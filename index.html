@@ -1,44 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ZANECO Report Generator</title>
-  <style>
-    /* General Styles */
-    body { font-family: "Segoe UI", Arial, sans-serif; margin:0; padding:0; text-align:center; height: 100vh; overflow-x: hidden; }
-    .bg-slideshow { position: fixed; top:0; left:0; width:100%; height:100%; z-index: -1; overflow:hidden; }
-    .bg-slideshow img { width:100%; height:100%; object-fit: cover; position:absolute; top:0; left:0; opacity:0; animation: fadeBg 24s infinite; }
-    .bg-slideshow img:nth-child(1) { animation-delay: 0s; }
-    .bg-slideshow img:nth-child(2) { animation-delay: 8s; }
-    .bg-slideshow img:nth-child(3) { animation-delay: 16s; }
-    @keyframes fadeBg { 0% {opacity:0;} 10% {opacity:1;} 30% {opacity:1;} 40% {opacity:0;} 100% {opacity:0;} }
+<meta charset="UTF-8">
+<title>ZANECO Report Generator</title>
+<style>
+/* General Styles */
+body { font-family: "Segoe UI", Arial, sans-serif; margin:0; padding:0; text-align:center; height: 100vh; overflow-x: hidden; display: flex; }
 
-    header { background: #003366cc; color: gold; padding: 20px; text-align: center; font-size: 22px; font-weight: bold; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    header span { display:block; font-size:14px; color:white; margin-top:5px; }
+/* Sidebar */
+.sidebar { width: 230px; background: #00264d; color: gold; height: 100vh; position: fixed; left: 0; top: 0; padding-top: 20px; box-shadow: 2px 0 6px rgba(0,0,0,0.3); text-align: left; display: flex; flex-direction: column; justify-content: space-between; }
 
-    h1 { color:#003366; font-size: 28px; margin-bottom:10px; }
-    .box { background:#fff; padding:30px; margin:40px auto; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,0.2); width:85%; max-width:950px; position:relative; }
-    input, select { padding:10px; margin:10px; border-radius:8px; border:1px solid #bbb; font-size:14px; }
-    button { background: linear-gradient(135deg, gold, orange); border:none; padding:12px 22px; margin:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:14px; color:#003366; box-shadow:0 3px 6px rgba(0,0,0,0.2); transition: transform 0.1s ease; }
-    button:hover { background: linear-gradient(135deg, orange, gold); transform:scale(1.05); }
-    .hidden { display:none; }
-    .error { color:red; font-weight:bold; display:none; margin-top:10px; }
-    table { border-collapse:collapse; width:100%; margin-top:20px; font-size:14px; }
-    th, td { border:1px solid #333; padding:10px; text-align:center; }
-    th { background:#003366; color:gold; font-size:15px; }
-    tr:nth-child(even) { background:#f9f9f9; }
-    tr:hover { background:#eef6ff; }
-    .top-btn { position:absolute; top:15px; left:15px; background:#003366; color:white; font-size:12px; padding:6px 12px; border-radius:6px; }
-    .about-box { position:absolute; top:15px; right:15px; background:#003366; color:gold; padding:8px 14px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold; box-shadow:0 2px 6px rgba(0,0,0,0.2); }
-    .about-content { text-align:left; margin-top:20px; border:1px solid #ccc; padding:18px; border-radius:10px; background:#fefefe; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1); }
-    .delete-btn { background:red; color:white; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
-    .delete-btn:hover { background:darkred; }
-  </style>
+/* ✅ Hide sidebar until login */
+.sidebar.hidden { display: none; }
+
+/* ✅ Adjust main-content and background when sidebar is hidden */
+.main-content.fullscreen,
+.bg-slideshow.fullscreen {
+  margin-left: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+}
+
+.sidebar h2 { color: white; text-align: center; margin-bottom: 25px; font-size: 18px; }
+.sidebar-nav { flex-grow: 1; }
+.sidebar a { display: block; color: gold; padding: 12px 20px; text-decoration: none; transition: background 0.3s; }
+.sidebar a:hover { background: #003366; }
+.submenu { display: none; background: #003366; }
+.submenu a { padding-left: 40px; font-size: 14px; color: #ffdb4d; }
+.menu-item { cursor: pointer; font-weight: 500; }
+.footer-section { background: #001a33; color: #ccc; padding: 10px; text-align: center; font-size: 12px; border-top: 1px solid #003366; }
+
+.main-content { margin-left: 230px; flex: 1; position: relative; }
+
+/* Existing styles (unchanged) */
+.bg-slideshow { position: fixed; top:0; left:230px; width:calc(100% - 230px); height:100%; z-index: -1; overflow:hidden; }
+.bg-slideshow img { width:100%; height:100%; object-fit: cover; position:absolute; top:0; left:0; opacity:0; animation: fadeBg 24s infinite; }
+.bg-slideshow img:nth-child(1) { animation-delay: 0s; }
+.bg-slideshow img:nth-child(2) { animation-delay: 8s; }
+.bg-slideshow img:nth-child(3) { animation-delay: 16s; }
+@keyframes fadeBg { 0% {opacity:0;} 10% {opacity:1;} 30% {opacity:1;} 40% {opacity:0;} 100% {opacity:0;} }
+
+header { background: #003366cc; color: gold; padding: 20px; text-align: center; font-size: 22px; font-weight: bold; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+header span { display:block; font-size:14px; color:white; margin-top:5px; }
+h1 { color:#003366; font-size: 28px; margin-bottom:10px; }
+.box { background:#fff; padding:30px; margin:40px auto; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,0.2); width:85%; max-width:950px; position:relative; }
+input, select { padding:10px; margin:10px; border-radius:8px; border:1px solid #bbb; font-size:14px; }
+button { background: linear-gradient(135deg, gold, orange); border:none; padding:12px 22px; margin:10px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:14px; color:#003366; box-shadow:0 3px 6px rgba(0,0,0,0.2); transition: transform 0.1s ease; }
+button:hover { background: linear-gradient(135deg, orange, gold); transform:scale(1.05); }
+.hidden { display:none; }
+.error { color:red; font-weight:bold; display:none; margin-top:10px; }
+table { border-collapse:collapse; width:100%; margin-top:20px; font-size:14px; }
+th, td { border:1px solid #333; padding:10px; text-align:center; }
+th { background:#003366; color:gold; font-size:15px; }
+tr:nth-child(even) { background:#f9f9f9; }
+tr:hover { background:#eef6ff; }
+.top-btn { position:absolute; top:15px; left:15px; background:#003366; color:white; font-size:12px; padding:6px 12px; border-radius:6px; }
+.about-content { text-align:left; margin-top:20px; border:1px solid #ccc; padding:18px; border-radius:10px; background:#fefefe; box-shadow: inset 0 2px 6px rgba(0,0,0,0.1); }
+.delete-btn { background:red; color:white; border:none; border-radius:6px; padding:6px 12px; cursor:pointer; }
+.delete-btn:hover { background:darkred; }
+</style>
 </head>
 <body>
 
+<!-- Sidebar -->
+<div class="sidebar hidden">
+  <div class="sidebar-nav">
+    <h2>⚡ Menu</h2>
+    <a class="menu-item" onclick="secureShowPage('introPage')">🏠 Home</a>
+    <a class="menu-item" onclick="toggleSection('aboutSectionSidebar')">ℹ About this Website</a>
+    <div id="aboutSectionSidebar" class="about-content hidden" style="margin:10px;">
+      <h3>About this Website</h3>
+      <p>Designed and developed by <b>Engr. Jhon Kevent Antecristo</b> – Planning and Design Assistant at <b>Zamboanga Del Norte Electric Cooperative (ZANECO)</b>.<br><br>
+      This system helps engineers and planners calculate and generate material requirements for distribution line structures based on NEA Engineering Bulletins. It provides quick summaries and printable reports for project use.</p>
+    </div>
+    <a class="menu-item" onclick="toggleSubmenu()">📘 Learn About Structures ▾</a>
+    <div class="submenu" id="learnSubmenu">
+      <a href="#">Distribution Line Structures</a>
+      <a href="#">Sub-Transmission Line Structures</a>
+    </div>
+    <a href="#">⚙ Bus Loading Calculation</a>
+  </div>
+  <div class="footer-section">
+    ZANECO © 2025<br>All Rights Reserved
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content fullscreen">
+
   <!-- Background Slideshow -->
-  <div class="bg-slideshow">
+  <div class="bg-slideshow fullscreen">
     <img src="zaneco.jpg" alt="bg1">
     <img src="zaneco1.jpg" alt="bg2">
     <img src="zaneco2.jpg" alt="bg3">
@@ -63,15 +114,10 @@
   <!-- INTRO PAGE -->
   <div id="introPage" class="box hidden">
     <button class="top-btn" onclick="logout()">⬅ Logout</button>
-    <div class="about-box" onclick="toggleAbout()">ℹ About</div>
     <h1>Main Menu</h1>
     <p>Choose an option:</p>
     <button onclick="showPage('materialCostPage')">💰 Distribution Line Material Cost</button>
     <button onclick="showPage('materialListPage')">📋 Distribution Line Material List</button>
-    <div id="aboutSection" class="about-content hidden">
-      <h3>About this Website</h3>
-      <p>Designed and developed by <b>Engr. Jhon Kevent Antecristo</b> – Planning and Design Assistant at <b>Zamboanga Del Norte Electric Cooperative (ZANECO)</b>.<br><br>This system helps engineers and planners calculate and generate material requirements for distribution line structures based on NEA Engineering Bulletins. It provides quick summaries and printable reports for project use.</p>
-    </div>
   </div>
 
   <!-- MATERIAL COST PAGE -->
@@ -91,13 +137,11 @@
     <input type="number" id="structureQty" min="1" value="1" style="width:80px;">
     <button onclick="addStructure()">➕ Add Structure</button>
     <button onclick="printReport()">🖨 Print Report</button>
-
     <h3>Selected Structures</h3>
     <table>
       <thead><tr><th>#</th><th>Structure</th><th>Qty</th><th>Action</th></tr></thead>
       <tbody id="structureTable"></tbody>
     </table>
-
     <h3>Materials Summary</h3>
     <table>
       <thead><tr><th>Material</th><th>Quantity</th></tr></thead>
@@ -105,111 +149,159 @@
     </table>
   </div>
 
-  <script>
-    // Allowed users
-    const allowedUsers = { "Jhon Kevent Antecristo": "ZANECO123456", "Louie-J Iniego": "ZANECO123456" };
-    let currentUser = "";
-    let selectedStructures = [];
-    let materialSummary = {};
+</div>
 
-    // Structures database
-    const structuresDB = {
-      "A1": { "Anchor, Expanding 10,000 lbs": 2, "Bolt Machine 5/8x10": 10, "Nut Hex": 10 },
-      "A2": { "Crossarm 3x4x8": 2, "Insulator Pin": 2, "Lag Screw": 4 },
-      "A3": { "Clamp Suspension": 2, "Shackle Forged": 2, "Anchor Bolt": 2 },
-      "B1": { "Pole, Steel 30 ft": 1, "Ground Rod": 1, "Guy Wire": 2 },
-      "B2": { "Steel Rod": 2, "Coupling": 2, "Anchor Bolt": 2 }
-    };
+<script>
+function toggleSubmenu() {
+  document.getElementById('learnSubmenu').style.display =
+    document.getElementById('learnSubmenu').style.display === 'block' ? 'none' : 'block';
+}
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('hidden');
+}
 
-    // Login function
-    function login() {
-      const name = document.getElementById("username").value.trim();
-      const pass = document.getElementById("password").value.trim();
-      if (allowedUsers[name] && allowedUsers[name] === pass) {
-        currentUser = name;
-        document.getElementById("welcomeUser").textContent = "👤 Welcome, " + name;
-        document.getElementById("welcomeUser").classList.remove("hidden");
-        showPage("introPage");
-        document.getElementById("error").style.display = "none";
-      } else { document.getElementById("error").style.display = "block"; }
+const allowedUsers = {
+  "Jhon Kevent Antecristo": "ZANECO123456",
+  "Louie-J Iniego": "ZANECO123456"
+};
+let currentUser = "";
+let selectedStructures = [];
+let materialSummary = {};
+const structuresDB = {
+  "A1": { "Anchor, Expanding 10,000 lbs": 2, "Bolt Machine 5/8x10": 10, "Nut Hex": 10 },
+  "A2": { "Crossarm 3x4x8": 2, "Insulator Pin": 2, "Lag Screw": 4 },
+  "A3": { "Clamp Suspension": 2, "Shackle Forged": 2, "Anchor Bolt": 2 },
+  "B1": { "Pole, Steel 30 ft": 1, "Ground Rod": 1, "Guy Wire": 2 },
+  "B2": { "Steel Rod": 2, "Coupling": 2, "Anchor Bolt": 2 }
+};
+
+// ✅ LOGIN VALIDATION
+function login() {
+  const name = document.getElementById("username").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  if (allowedUsers[name] && allowedUsers[name] === pass) {
+    currentUser = name;
+    document.getElementById("welcomeUser").textContent = "👤 Welcome, " + name;
+    document.getElementById("welcomeUser").classList.remove("hidden");
+    document.querySelector(".sidebar").classList.remove("hidden");
+    document.querySelector(".main-content").classList.remove("fullscreen");
+    document.querySelector(".bg-slideshow").classList.remove("fullscreen");
+    document.getElementById("error").style.display = "none";
+    showPage("introPage");
+  } else {
+    document.getElementById("error").style.display = "block";
+  }
+}
+
+// ✅ LOGOUT hides sidebar again
+function logout() {
+  currentUser = "";
+  selectedStructures = [];
+  materialSummary = {};
+  document.getElementById("username").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("welcomeUser").classList.add("hidden");
+  document.querySelector(".sidebar").classList.add("hidden");
+  document.querySelector(".main-content").classList.add("fullscreen");
+  document.querySelector(".bg-slideshow").classList.add("fullscreen");
+  showPage("loginPage");
+}
+
+function secureShowPage(pageId) {
+  if (!currentUser) {
+    alert("Please log in first!");
+    showPage("loginPage");
+    return;
+  }
+  showPage(pageId);
+}
+
+function showPage(pageId) {
+  document.querySelectorAll(".box").forEach(el => el.classList.add("hidden"));
+  document.getElementById(pageId).classList.remove("hidden");
+  if (pageId === "materialListPage") {
+    populateStructureSelect();
+    updateTables();
+  }
+}
+
+function populateStructureSelect() {
+  const select = document.getElementById("structureSelect");
+  select.innerHTML = '<option value="">-- Select Structure --</option>';
+  Object.keys(structuresDB).forEach(code => {
+    let opt = document.createElement("option");
+    opt.value = code;
+    opt.textContent = code;
+    select.appendChild(opt);
+  });
+}
+
+function addStructure() {
+  const code = document.getElementById("structureSelect").value;
+  const qty = parseInt(document.getElementById("structureQty").value);
+  if (!code) return alert("Please select a structure!");
+  if (qty <= 0) return alert("Quantity must be at least 1");
+  selectedStructures.push({ code, qty });
+  const materials = structuresDB[code];
+  for (let mat in materials) {
+    materialSummary[mat] = (materialSummary[mat] || 0) + materials[mat] * qty;
+  }
+  updateTables();
+}
+
+function deleteStructure(index) {
+  selectedStructures.splice(index, 1);
+  materialSummary = {};
+  selectedStructures.forEach(({ code, qty }) => {
+    const mats = structuresDB[code];
+    for (let m in mats) {
+      materialSummary[m] = (materialSummary[m] || 0) + mats[m] * qty;
     }
+  });
+  updateTables();
+}
 
-    function logout() {
-      currentUser = "";
-      selectedStructures = [];
-      materialSummary = {};
-      document.getElementById("username").value = "";
-      document.getElementById("password").value = "";
-      document.getElementById("welcomeUser").classList.add("hidden");
-      showPage("loginPage");
-    }
+function updateTables() {
+  const sTable = document.getElementById("structureTable");
+  sTable.innerHTML = selectedStructures.map((s,i)=>`<tr><td>${i+1}</td><td>${s.code}</td><td>${s.qty}</td><td><button class="delete-btn" onclick="deleteStructure(${i})">Remove</button></td></tr>`).join("");
+  const mTable = document.getElementById("materialsTable");
+  mTable.innerHTML = Object.entries(materialSummary).map(([mat,qty])=>`<tr><td>${mat}</td><td>${qty}</td></tr>`).join("");
+}
 
-    function showPage(pageId) {
-      document.querySelectorAll(".box").forEach(el => el.classList.add("hidden"));
-      document.getElementById(pageId).classList.remove("hidden");
-      if (pageId === "materialListPage") { populateStructureSelect(); updateTables(); }
-    }
+function printReport() {
+  if (selectedStructures.length === 0) return alert("No structures added!");
+  let html = `<html><head><title>ZANECO Report</title><style>
+  @page { size: A4 portrait; margin: 20mm; }
+  body { font-family: Arial; padding: 20px; }
+  h2,h3 { text-align: center; margin: 5px 0; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+  th, td { border: 1px solid #333; padding: 6px; font-size: 12px; }
+  th { background: #003366; color: gold; }
+  </style></head><body>
+  <h2>ZAMBOANGA DEL NORTE ELECTRIC COOPERATIVE, INC.</h2>
+  <h3>Technical Services Department</h3><hr>
+  <p><b>Prepared by:</b> ${currentUser}</p>
+  <h3>Selected Structures</h3>
+  <table><thead><tr><th>#</th><th>Structure</th><th>Qty</th></tr></thead><tbody>
+  ${selectedStructures.map((s,i)=>`<tr><td>${i+1}</td><td>${s.code}</td><td>${s.qty}</td></tr>`).join("")}
+  </tbody></table>
+  <h3>Materials Summary</h3>
+  <table><thead><tr><th>Material</th><th>Quantity</th></tr></thead><tbody>
+  ${Object.entries(materialSummary).map(([m,q])=>`<tr><td>${m}</td><td>${q}</td></tr>`).join("")}
+  </tbody></table></body></html>`;
+  const w = window.open("", "_blank");
+  w.document.write(html);
+  w.document.close();
+  w.print();
+}
 
-    function toggleAbout() { document.getElementById("aboutSection").classList.toggle("hidden"); }
-
-    function populateStructureSelect() {
-      const select = document.getElementById("structureSelect");
-      select.innerHTML = '<option value="">-- Select Structure --</option>';
-      Object.keys(structuresDB).forEach(code => {
-        let opt = document.createElement("option");
-        opt.value = code; opt.textContent = code; select.appendChild(opt);
-      });
-    }
-
-    function addStructure() {
-      const code = document.getElementById("structureSelect").value;
-      const qty = parseInt(document.getElementById("structureQty").value);
-      if (!code) return alert("Please select a structure!");
-      if (qty <= 0) return alert("Quantity must be at least 1");
-      selectedStructures.push({ code, qty });
-      const materials = structuresDB[code];
-      for (let mat in materials) { materialSummary[mat] = (materialSummary[mat] || 0) + materials[mat] * qty; }
-      updateTables();
-    }
-
-    function deleteStructure(index) {
-      selectedStructures.splice(index, 1);
-      materialSummary = {};
-      selectedStructures.forEach(({ code, qty }) => {
-        const mats = structuresDB[code];
-        for (let m in mats) { materialSummary[m] = (materialSummary[m] || 0) + mats[m] * qty; }
-      });
-      updateTables();
-    }
-
-    function updateTables() {
-      const sTable = document.getElementById("structureTable");
-      sTable.innerHTML = selectedStructures.map((s,i)=>`<tr><td>${i+1}</td><td>${s.code}</td><td>${s.qty}</td><td><button class="delete-btn" onclick="deleteStructure(${i})">Remove</button></td></tr>`).join("");
-      const mTable = document.getElementById("materialsTable");
-      mTable.innerHTML = Object.entries(materialSummary).map(([mat,qty])=>`<tr><td>${mat}</td><td>${qty}</td></tr>`).join("");
-    }
-
-    function printReport() {
-      if (selectedStructures.length === 0) return alert("No structures added!");
-      let html = `<html><head><title>ZANECO Report</title><style>
-        body { font-family: Arial; padding: 20px; } h2,h3 { text-align: center; margin: 5px 0; }
-        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-        th, td { border: 1px solid #333; padding: 6px; font-size: 12px; }
-        th { background: #003366; color: gold; }
-      </style></head><body>
-      <h2>ZAMBOANGA DEL NORTE ELECTRIC COOPERATIVE, INC.</h2>
-      <h3>Technical Services Department</h3><hr>
-      <p><b>Prepared by:</b> ${currentUser}</p>
-      <h3>Selected Structures</h3>
-      <table><thead><tr><th>#</th><th>Structure</th><th>Qty</th></tr></thead><tbody>
-      ${selectedStructures.map((s,i)=>`<tr><td>${i+1}</td><td>${s.code}</td><td>${s.qty}</td></tr>`).join("")}
-      </tbody></table>
-      <h3>Materials Summary</h3>
-      <table><thead><tr><th>Material</th><th>Quantity</th></tr></thead><tbody>
-      ${Object.entries(materialSummary).map(([m,q])=>`<tr><td>${m}</td><td>${q}</td></tr>`).join("")}
-      </tbody></table></body></html>`;
-      const w = window.open("", "_blank"); w.document.write(html); w.document.close(); w.print();
-    }
-  </script>
+// Force login on page load
+window.onload = function() {
+  document.querySelector(".sidebar").classList.add("hidden");
+  document.querySelector(".main-content").classList.add("fullscreen");
+  document.querySelector(".bg-slideshow").classList.add("fullscreen");
+  showPage("loginPage");
+}
+</script>
 </body>
 </html>

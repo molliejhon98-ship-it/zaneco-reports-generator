@@ -62,7 +62,7 @@ tr:nth-child(even){background:#f9f9f9;} tr:hover{background:#eef6ff;}
 #printConfirmButtons .cancel, #aboutModalButtons .cancel { background: #555; color: white; }
 @keyframes popOut { to { transform: scale(1); } } @keyframes fadeIn { to { opacity: 1; } }
 
-/* Bus calculator styles scoped */
+/* Transformer KVA calculator styles scoped */
 .bus-container { max-width: 100%; margin: 0 auto; text-align: center; color: #0f172a; }
 .bus-container .card { border-radius: 8px; padding: 12px; background: white; border: 1px solid #e2e8f0; margin-top: 14px; }
 .bus-container table{width:100%;border-collapse:collapse;margin-top:12px;background:white}
@@ -87,7 +87,7 @@ tr:nth-child(even){background:#f9f9f9;} tr:hover{background:#eef6ff;}
       <a href="#">Distribution Line Structures</a>
       <a href="#">Sub-Transmission Line Structures</a>
     </div>
-    <a class="menu-item" onclick="secureShowPage('busLoadingPage')">⚙ Bus Loading Calculation</a>
+    <a class="menu-item" onclick="secureShowPage('busLoadingPage')">⚙ Transformer KVA Calculation</a>
   </div>
   <div class="footer-section">ZANECO © 2025<br>All Rights Reserved</div>
 </div>
@@ -121,7 +121,6 @@ tr:nth-child(even){background:#f9f9f9;} tr:hover{background:#eef6ff;}
     <img src="logo.png" alt="ZANECO Logo" style="max-width:200px;">
   </div>
 </div>
-
 
   <div id="materialCostPage" class="box hidden">
     <button class="top-btn" onclick="showPage('introPage')">⬅ Back</button>
@@ -182,6 +181,7 @@ tr:nth-child(even){background:#f9f9f9;} tr:hover{background:#eef6ff;}
     </div>
   </div>
 </div>
+
 
 <script>
 function toggleSubmenu(){ const m=document.getElementById('learnSubmenu'); m.style.display = (m.style.display === 'block') ? 'none' : 'block'; }

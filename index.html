@@ -62,7 +62,6 @@ tr:nth-child(even){background:#f9f9f9;} tr:hover{background:#eef6ff;}
 #printConfirmButtons .cancel, #aboutModalButtons .cancel { background: #555; color: white; }
 @keyframes popOut { to { transform: scale(1); } } @keyframes fadeIn { to { opacity: 1; } }
 
-/* Transformer KVA calculator styles scoped */
 .bus-container { max-width: 100%; margin: 0 auto; text-align: center; color: #0f172a; }
 .bus-container .card { border-radius: 8px; padding: 12px; background: white; border: 1px solid #e2e8f0; margin-top: 14px; }
 .bus-container table{width:100%;border-collapse:collapse;margin-top:12px;background:white}
@@ -73,6 +72,16 @@ tr:nth-child(even){background:#f9f9f9;} tr:hover{background:#eef6ff;}
 .bus-container button{padding:8px 12px;border-radius:6px;border:0;background:#0284c7;color:white;cursor:pointer}
 .bus-container button.secondary{background:#64748b}
 .bus-container .result{font-weight:700;font-size:17px;margin-top:10px}
+
+/* Pole Capacity Calculator styles (new feature) */
+.pole-cap { max-width: 950px; margin: 10px auto 40px; text-align: left; }
+.pole-cap .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+.pole-cap label { min-width:160px; font-weight:600; color:#0f172a; }
+.pole-cap input[type="number"] { width:160px; padding:8px; border-radius:6px; border:1px solid #ccc; }
+.pole-cap .calc-btn { background:#0284c7; color:white; border-radius:8px; padding:10px 14px; border:0; cursor:pointer; font-weight:700; }
+.result-table { width:100%; border-collapse:collapse; margin-top:12px; }
+.result-table th, .result-table td { border:1px solid #cbd5e1; padding:8px; text-align:center; }
+.result-note { margin-top:10px; font-size:13px; color:#333; }
 </style>
 </head>
 <body>
@@ -88,6 +97,8 @@ tr:nth-child(even){background:#f9f9f9;} tr:hover{background:#eef6ff;}
       <a href="#">Sub-Transmission Line Structures</a>
     </div>
     <a class="menu-item" onclick="secureShowPage('busLoadingPage')">⚙ Transformer KVA Calculation</a>
+    <!-- NEW NAV: Pole Capacity Calculator -->
+    <a class="menu-item" onclick="secureShowPage('poleCapacityPage')">🛠 Pole Capacity Calculation</a>
   </div>
   <div class="footer-section">ZANECO © 2025<br>All Rights Reserved</div>
 </div>
@@ -178,6 +189,42 @@ tr:nth-child(even){background:#f9f9f9;} tr:hover{background:#eef6ff;}
         2. Energy Use (kWh/day) = (Connected Load × Hours of Use) / 1000<br>
         3. Transformer kVA = Total Watts / (1000 × PF)<br>
         4. Recommended Transformer kVA = Transformer kVA × Safety Factor (1.10–1.25)</p>
+    </div>
+  </div>
+
+  <!-- NEW: Pole Capacity Calculator Page -->
+  <div id="poleCapacityPage" class="box hidden">
+    <button class="top-btn" onclick="showPage('introPage')">⬅ Back</button>
+    <h1>Pole Capacity Calculation</h1>
+
+    <div class="pole-cap">
+      <p style="margin-bottom:6px;">
+        Enter pole properties (Butt diameter and thickness) and the pole's <b>Minimum Load Break</b> (in kN·m).
+        The calculator uses embedded design-moment values (per transformer) to estimate how many identical transformers
+        the pole can support. Results are shown rounded to <b>2 decimal places</b>.
+      </p>
+
+      <div class="row">
+        <label for="buttDia">Butt Diameter (mm)</label>
+        <input id="buttDia" type="number" placeholder="e.g. 300" value="300" min="0">
+        <label for="thickness">Thickness (mm)</label>
+        <input id="thickness" type="number" placeholder="e.g. 16" value="16" min="0">
+        <label for="minLoadBreak">Minimum Load Break (kN·m)</label>
+        <input id="minLoadBreak" type="number" placeholder="e.g. 50" value="50" step="0.01" min="0">
+        <button class="calc-btn" onclick="calculatePoleCapacity()">Calculate Capacity</button>
+      </div>
+
+      <div id="poleResultArea" style="margin-top:14px;">
+        <!-- results will be injected here -->
+      </div>
+
+      <p class="result-note">
+        Notes:<br>
+        • Design moment values are embedded (based on typical 8 kg/kVA mass and 7 m lever arm):<br>
+        &nbsp;&nbsp;15 kVA → 8.2404 kN·m, 25 kVA → 13.7340 kN·m, 50 kVA → 27.4680 kN·m, 75 kVA → 41.2020 kN·m,<br>
+        &nbsp;&nbsp;100 kVA → 54.9360 kN·m, 150 kVA → 82.4040 kN·m, 200 kVA → 109.8720 kN·m.<br>
+        • Calculation: <i>Supported units = Min Load Break ÷ Design moment (per transformer)</i>. Values shown rounded to 2 decimals.
+      </p>
     </div>
   </div>
 </div>
@@ -377,6 +424,55 @@ function initBusCalculator(){
     document.getElementById('resultsCardBus').style.display = 'block';
   };
 }
+
+/* ---------------------------
+   NEW FEATURE: Pole Capacity Calculation
+   - designMoments are embedded (based on 8 kg/kVA, 9.81, lever arm 7 m)
+   - results are rounded to 2 decimal places
+   --------------------------- */
+
+const designMoments = {
+  15: 8.2404,
+  25: 13.7340,
+  50: 27.4680,
+  75: 41.2020,
+  100: 54.9360,
+  150: 82.4040,
+  200: 109.8720
+};
+
+function calculatePoleCapacity(){
+  // Read inputs
+  const buttDia = Number(document.getElementById('buttDia').value) || 0;
+  const thickness = Number(document.getElementById('thickness').value) || 0;
+  const minLoadBreak = Number(document.getElementById('minLoadBreak').value);
+
+  // basic validation
+  if(isNaN(minLoadBreak) || minLoadBreak <= 0){
+    alert('Please enter a valid Minimum Load Break (kN·m) greater than 0.');
+    return;
+  }
+
+  // Build results HTML
+  let html = `<h3>Pole: Butt ${buttDia} mm | Thickness ${thickness} mm | Min Load Break ${minLoadBreak.toFixed(2)} kN·m</h3>`;
+  html += `<table class="result-table"><thead><tr><th>Transformer (kVA)</th><th>Design moment (kN·m)</th><th>Units supported (MinLoadBreak ÷ DesignMoment)</th></tr></thead><tbody>`;
+
+  Object.keys(designMoments).forEach(k => {
+    const kVA = Number(k);
+    const dm = designMoments[kVA];
+    let units = minLoadBreak / dm;
+    // round to 2 decimals as requested
+    units = Math.round(units * 100) / 100;
+    html += `<tr><td>${kVA}</td><td>${dm.toFixed(4)}</td><td>${units.toFixed(2)}</td></tr>`;
+  });
+
+  html += `</tbody></table>`;
+  html += `<p style="margin-top:8px;font-size:13px;color:#333">Interpretation: A value of <b>2.50</b> units means the pole could theoretically support 2.5 identical transformers of that kVA rating based purely on bending moment. This calculation <u>does not</u> include factors such as conductor load, wind, dynamic effects, local code safety factors, or foundation/pad pressure checks. Use with engineering judgment.</p>`;
+
+  document.getElementById('poleResultArea').innerHTML = html;
+}
+
+/* end: new feature */
 
 window.onload = function(){ showPage("loginPage"); };
 </script>
